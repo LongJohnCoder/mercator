@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name	Google Meet Studio Mini
-// @version	1.10.8
+// @version	1.11.0
 // @description	Change how you look on Google Meet.
 // @author	Xing <dev@x-ing.space> (https://x-ing.space)
 // @copyright	2020, Xing (https://x-ing.space)
@@ -24,20 +24,17 @@
 	// Create form
 
 	const main = document.createElement('main')
+	main.classList.add('collapsed')
 	main.addEventListener('click',event=>{
-		if (
-			!main.classList.contains('focus')
-			&& event.target !== collapse
-		) {
-			main.classList.add('focus')
-		}
+		if(event.target === collapse) return
+		main.classList.remove('collapsed')
 	})
 
 	const collapse = document.createElement('button')
 	collapse.textContent = '↑ collapse ↑'
 	collapse.id = 'collapse'
 	collapse.addEventListener('click',()=>{
-		main.classList.remove('focus')
+		main.classList.add('collapsed')
 	})
 
 	const form = document.createElement('form')
@@ -66,46 +63,42 @@ main {
 	top: 0;
 	width: 480px;
 	max-width: 100vw;
-	height: auto;
+	height: 100vh;
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	background: white;
-	transform: translateY(calc(-100% + 3rem));
 	box-shadow: 0 .1rem .25rem #0004;
-	border-radius: 0 0 .75rem 0;
-	padding: 1rem 1rem 0 1rem;
-	overflow: hidden scroll;
-	font-family: ${font_family};
-	font-size: 1rem;
-	cursor: pointer;
-}
-button{
-	font-family: inherit;
-	font-size: .8rem;
-}
-main #collapse {
-	background: white;
-	cursor: pointer;
-	margin-bottom: .5rem;
-}
-main.focus {
-	transform: none;
-	border-radius: 0;
-	height: 100vh;
 	padding: 1rem;
+	overflow: hidden scroll;
+	font: 1rem ${font_family};
 	cursor: default;
 }
+button{
+	font: .8rem inherit;
+}
+#collapse {
+	background: white;
+	cursor: pointer;
+}
+form {
+	margin: .5rem 0;
+}
+main.collapsed {
+	transform: translateY(calc(3rem - 100%));
+	border-radius: 0 0 .75rem 0;
+	height: auto;
+	padding-bottom: 1rem;
+	cursor: pointer;
+}
 #previews {
-	margin-top: 1rem;
-	height: 3rem;
 	display: flex;
 }
-#previews>video,
-#previews>canvas {
-	height: 100%;
-	width: auto;
+#previews video,
+#previews canvas {
+	height: auto;
+	width: calc(50% - .5rem);
 	background-image: linear-gradient(90deg,
 		hsl( 18, 100%, 68%) 16.7%,	hsl(-10, 100%, 80%) 16.7%,
 		hsl(-10, 100%, 80%) 33.3%,	hsl(  5,  90%, 72%) 33.3%,
@@ -115,26 +108,28 @@ main.focus {
 	);
 	margin-right: 1rem;
 }
-#previews>h1 {
+h1 {
+	display: none;
+}
+.collapsed h1 {
 	flex-grow: 1;
+	display: flex;
 	font-size: 1rem;
 	font-weight: normal;
-	text-align: center;
+	align-items: center;
+	justify-content: center;
 	color: #444;
 	line-height: 1.5rem;
 }
-:hover>#previews>h1 {
+.collapsed:hover h1 {
 	transform: translateY(.1rem); /* Tiny nudge downwards */
 }
-.focus>#previews>h1 {
-	display: none;
+.collapsed #previews {
+	height: 3rem;
 }
-.focus>#previews {
-	height: auto;
-}
-.focus>#previews>* {
-	height: auto;
-	width: calc(50% - .5rem);
+.collapsed #previews * {
+	height: inherit;
+	width: auto;
 }
 #presets,
 label {
@@ -157,7 +152,7 @@ label {
 	height: 2rem;
 }
 label>*{
-	width: 80%;
+	width: calc(100% - 6.5rem);
 }
 label>*,
 #collapse {
@@ -251,7 +246,7 @@ input#letterbox {
 			let input = document.createElement('input')
 			if ( key == 'text' ) {
 				input.type = 'text'
-				input.placeholder = 'text'
+				input.placeholder = '🌈 Write text here 🌦️'
 			} else {
 				input.type = 'range'
 				input.min = [
@@ -393,8 +388,16 @@ input#letterbox {
 	// Create title
 
 	const h1 = document.createElement('h1')
+	let show_credits = false
 
 	h1.textContent = '↓ Google Meet Studio Mini ↓'
+	main.addEventListener('contextmenu',event=>{
+		event.preventDefault()
+		if(main.classList.contains('collapsed')){
+			show_credits = !show_credits
+			h1.textContent = show_credits ? '↓ A project by Xing ↓' : '↓ Google Meet Studio Mini ↓'
+        }
+	})
 
 	previews.append(video,canvas,h1)
 
